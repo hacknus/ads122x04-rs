@@ -18,9 +18,7 @@ mod private {
 
     pub trait Sealed {}
 
-    impl<UART> Sealed for interface::SerialInterface<UART>
-
-    {}
+    impl<UART> Sealed for interface::SerialInterface<UART> {}
 
     impl<I2C, > Sealed for interface::I2cInterface<I2C> {}
 }
