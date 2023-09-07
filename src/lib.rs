@@ -79,9 +79,10 @@ impl<I2C, I2cError> ADS122x04<I2cInterface<I2C>>
         }
     }
 }
+
 impl<UART, EW, ER> ADS122x04<SerialInterface<UART>>
     where
-        UART:  serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER>,
+        UART: serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER>,
 {
     /// Create a new ADS122C04 device by supplying a serial handler (UART)
     pub fn new_serial(serial: UART) -> Self {

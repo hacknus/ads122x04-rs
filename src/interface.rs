@@ -52,7 +52,7 @@ impl<I2C, E> WriteData for I2cInterface<I2C>
 
 impl<UART, EW, ER> WriteData for SerialInterface<UART>
     where
-        UART:  serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER> ,
+        UART: serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER>,
 {
     type Error = Error<(), EW, ER>;
     fn write_register(&mut self, register: u8, data: u8) -> Result<(), Self::Error> {
@@ -107,7 +107,7 @@ impl<I2C, E> ReadData for I2cInterface<I2C>
 
 impl<UART, EW, ER> ReadData for SerialInterface<UART>
     where
-        UART: serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER> ,
+        UART: serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER>,
 {
     type Error = Error<(), EW, ER>;
     fn read_register(&mut self, register: u8) -> Result<u8, Self::Error> {
