@@ -13,8 +13,8 @@ use embedded_hal::{
 use crate::{interface::{I2cInterface, ReadData, SerialInterface, WriteData}};
 use crate::registers::*;
 
-mod registers;
-mod interface;
+pub mod registers;
+pub mod interface;
 
 
 mod private {
