@@ -27,3 +27,8 @@ use ads122x04::{interface::*, registers::*, ADS122x04, Error as ADS122x04Error};
 
 TODO:
 - [ ] implement CRC
+
+### Products That Use This Library
+
+- [Qwiic PT100 - ADS122C04 (SPX-16770)](https://www.sparkfun.com/products/16770)  
+  Sparkfun sensor development board. Can be used to read a PT100 RTD.
