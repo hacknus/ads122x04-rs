@@ -24,12 +24,10 @@ mod private {
 }
 
 #[derive(Debug)]
-pub enum Error<I2cError, EW, ER>
+pub enum Error<E>
 {
     InvalidValue,
-    I2CError(I2cError),
-    SerialReadError(ER),
-    SerialWriteError(EW),
+    CommError(E),
 }
 
 pub struct ADS122x04<BUS>
@@ -51,9 +49,9 @@ pub struct ADS122x04<BUS>
     burn_out_current_sources: bool,
 }
 
-impl<I2C, I2cError> ADS122x04<I2cInterface<I2C>>
+impl<I2C, E> ADS122x04<I2cInterface<I2C>>
     where
-        I2C: i2c::Write<Error=I2cError> + i2c::WriteRead<Error=I2cError>,
+        I2C: i2c::Write<Error=E> + i2c::WriteRead<Error=E>,
 {
     /// Create a new ADS122C04 device by supplying an I2C address and I2C handler
     pub fn new_i2c(address: u8, i2c: I2C) -> Self
@@ -78,9 +76,9 @@ impl<I2C, I2cError> ADS122x04<I2cInterface<I2C>>
     }
 }
 
-impl<UART, EW, ER> ADS122x04<SerialInterface<UART>>
+impl<UART, E> ADS122x04<SerialInterface<UART>>
     where
-        UART: serial::Write<u8, Error=EW> + serial_nb::Read<u8, Error=ER>,
+        UART: serial::Write<u8, Error=E> + serial_nb::Read<u8, Error=E>,
 {
     /// Create a new ADS122C04 device by supplying a serial handler (UART)
     pub fn new_serial(serial: UART) -> Self {
@@ -104,12 +102,12 @@ impl<UART, EW, ER> ADS122x04<SerialInterface<UART>>
     }
 }
 
-impl<BUS, I2cError, EW, ER> ADS122x04<BUS>
+impl<BUS, E> ADS122x04<BUS>
     where
-        BUS: ReadData<Error=Error<I2cError, EW, ER>> + WriteData<Error=Error<I2cError, EW, ER>>
+        BUS: ReadData<Error=Error<E>> + WriteData<Error=Error<E>>
 {
     /// updates a specified config register
-    fn update_reg(&mut self, reg: u8) -> Result<(), Error<I2cError, EW, ER>> {
+    fn update_reg(&mut self, reg: u8) -> Result<(), Error<E>> {
         match reg {
             0x00 => {
                 let val = (self.pga_bypass as u8) | (self.gain << 1) | ((self.mux as u8) << 4);
@@ -138,7 +136,7 @@ impl<BUS, I2cError, EW, ER> ADS122x04<BUS>
     }
 
     /// reads a specified config register
-    fn read_reg(&mut self, reg: u8) -> Result<u8, Error<I2cError, EW, ER>> {
+    fn read_reg(&mut self, reg: u8) -> Result<u8, Error<E>> {
         match reg {
             0x00 => self.bus.read_register(0x00),
             0x01 => self.bus.read_register(0x01),
@@ -149,18 +147,18 @@ impl<BUS, I2cError, EW, ER> ADS122x04<BUS>
     }
 
     /// Enable or disable the programmable gain amplifier (PGA)
-    pub fn set_pga_bypass(&mut self, state: bool) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_pga_bypass(&mut self, state: bool) -> Result<(), Error<E>> {
         self.pga_bypass = state;
         self.update_reg(0x00)
     }
 
     /// Read the status of the programmable gain amplifier (PGA)
-    pub fn get_pga_bypass(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_pga_bypass(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x00).map(|val| (val & 0b1) == 1)
     }
 
     /// Set the gain as either 1, 2, 4, 8, 16, 32, 64 or 128
-    pub fn set_gain(&mut self, gain: u8) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_gain(&mut self, gain: u8) -> Result<(), Error<E>> {
         match gain {
             1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => {
                 self.gain = gain;
@@ -171,150 +169,150 @@ impl<BUS, I2cError, EW, ER> ADS122x04<BUS>
     }
 
     /// Read the gain value
-    pub fn get_gain(&mut self) -> Result<u8, Error<I2cError, EW, ER>> {
+    pub fn get_gain(&mut self) -> Result<u8, Error<E>> {
         self.read_reg(0x00).map(|val| (val >> 1) & 0b111)
     }
 
     /// Set the input multiplexer (MUX)
-    pub fn set_input_mux(&mut self, mux: Mux) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_input_mux(&mut self, mux: Mux) -> Result<(), Error<E>> {
         self.mux = mux;
         self.update_reg(0x00)
     }
 
     /// Read the input multiplexer (MUX) setting
-    pub fn get_input_mux(&mut self) -> Result<u8, Error<I2cError, EW, ER>> {
+    pub fn get_input_mux(&mut self) -> Result<u8, Error<E>> {
         self.read_reg(0x00).map(|val| val >> 4)
     }
 
     /// Enable or disable temperature sensor mode (TS)
-    pub fn set_temperature_sensor_mode(&mut self, state: bool) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_temperature_sensor_mode(&mut self, state: bool) -> Result<(), Error<E>> {
         self.temperature_sensor_mode = state;
         self.update_reg(0x01)
     }
 
     /// Read the temperature sensor mode (TS)
-    pub fn get_temperature_sensor_mode(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_temperature_sensor_mode(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x01).map(|val| (val & 0b1) == 1)
     }
 
     /// Set the voltage reference (VREF)
-    pub fn set_vref(&mut self, v_ref: VRef) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_vref(&mut self, v_ref: VRef) -> Result<(), Error<E>> {
         self.v_ref = v_ref;
         self.update_reg(0x01)
     }
 
     /// Read the voltage reference (VREF)
-    pub fn get_vref(&mut self) -> Result<VRef, Error<I2cError, EW, ER>> {
+    pub fn get_vref(&mut self) -> Result<VRef, Error<E>> {
         self.read_reg(0x01)
             .map(|val| VRef::from((val >> 1) & 0b11, self.v_ref.to_voltage()))
     }
 
     /// Set the conversion mode (CM)
-    pub fn set_conversion_mode(&mut self, mode: ConversionMode) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_conversion_mode(&mut self, mode: ConversionMode) -> Result<(), Error<E>> {
         self.conversion_mode = mode;
         self.update_reg(0x01)
     }
 
     /// Read the conversion mode (CM)
-    pub fn get_conversion_mode(&mut self) -> Result<ConversionMode, Error<I2cError, EW, ER>> {
+    pub fn get_conversion_mode(&mut self) -> Result<ConversionMode, Error<E>> {
         self.read_reg(0x01)
             .map(|val| ConversionMode::from((val >> 3) & 0b1))
     }
 
     /// Read the operating mode
-    pub fn get_operating_mode(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_operating_mode(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x01).map(|val| ((val >> 4) & 0b1) == 1)
     }
 
     /// Set the data rate
-    pub fn set_data_rate(&mut self, rate: DataRate) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_data_rate(&mut self, rate: DataRate) -> Result<(), Error<E>> {
         self.data_rate = rate;
         self.turbo_mode = (self.data_rate as u8 & 0b1) == 1;
         self.update_reg(0x01)
     }
 
     /// Read the data rate
-    pub fn get_data_rate(&mut self) -> Result<DataRate, Error<I2cError, EW, ER>> {
+    pub fn get_data_rate(&mut self) -> Result<DataRate, Error<E>> {
         self.read_reg(0x01)
             .map(|val| DataRate::from((val >> 4) & 0b1111))
     }
 
     /// Set the current level of the internal excitation current sources
-    pub fn set_current_level(&mut self, current: CurrentSource) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_current_level(&mut self, current: CurrentSource) -> Result<(), Error<E>> {
         self.current_source = current;
         self.update_reg(0x02)
     }
 
     /// Read the current level of the internal excitation current sources
-    pub fn get_current_level(&mut self) -> Result<CurrentSource, Error<I2cError, EW, ER>> {
+    pub fn get_current_level(&mut self) -> Result<CurrentSource, Error<E>> {
         self.read_reg(0x02)
             .map(|val| CurrentSource::from(val & 0b111))
     }
 
     /// Enable or disable the 10 uA burnout current sources
-    pub fn set_burnout_current_source(&mut self, state: bool) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_burnout_current_source(&mut self, state: bool) -> Result<(), Error<E>> {
         self.burn_out_current_sources = state;
         self.update_reg(0x02)
     }
 
     /// Read the state of the 10 uA burnout current sources
-    pub fn get_burnout_current_source(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_burnout_current_source(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x02).map(|val| ((val >> 3) & 0b1) == 1)
     }
 
     /// Set the CRC mode
-    pub fn set_crc(&mut self, crc: Crc) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_crc(&mut self, crc: Crc) -> Result<(), Error<E>> {
         self.crc = crc;
         self.update_reg(0x02)
     }
 
     /// Read the CRC mode
-    pub fn get_crc(&mut self) -> Result<Crc, Error<I2cError, EW, ER>> {
+    pub fn get_crc(&mut self) -> Result<Crc, Error<E>> {
         self.read_reg(0x02).map(|val| Crc::from((val >> 4) & 0b11))
     }
 
     /// Enable or disable data counter
-    pub fn set_data_counter(&mut self, state: bool) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_data_counter(&mut self, state: bool) -> Result<(), Error<E>> {
         self.data_counter_enable = state;
         self.update_reg(0x02)
     }
 
     /// Read the state of the data counter
-    pub fn get_data_counter(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_data_counter(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x02).map(|val| ((val >> 6) & 0b1) == 1)
     }
 
     /// Read the data ready (DRDY) register
-    pub fn get_data_ready(&mut self) -> Result<bool, Error<I2cError, EW, ER>> {
+    pub fn get_data_ready(&mut self) -> Result<bool, Error<E>> {
         self.read_reg(0x02).map(|val| ((val >> 7) & 0b1) == 1)
     }
 
     /// Set the current routing of the excitation current source 1
-    pub fn set_current_route_1(&mut self, route: CurrentRoute) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_current_route_1(&mut self, route: CurrentRoute) -> Result<(), Error<E>> {
         self.current_route_1 = route;
         self.update_reg(0x03)
     }
 
     /// Read the current routing of the excitation current source 1
-    pub fn get_current_route_1(&mut self) -> Result<CurrentRoute, Error<I2cError, EW, ER>> {
+    pub fn get_current_route_1(&mut self) -> Result<CurrentRoute, Error<E>> {
         self.read_reg(0x03)
             .map(|val| CurrentRoute::from((val >> 5) & 0b111))
     }
 
     /// Set the current routing of the excitation current source 2
-    pub fn set_current_route_2(&mut self, route: CurrentRoute) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn set_current_route_2(&mut self, route: CurrentRoute) -> Result<(), Error<E>> {
         self.current_route_2 = route;
         self.update_reg(0x03)
     }
 
     /// Read the current routing of the excitation current source 2
-    pub fn get_current_route_2(&mut self) -> Result<CurrentRoute, Error<I2cError, EW, ER>> {
+    pub fn get_current_route_2(&mut self) -> Result<CurrentRoute, Error<E>> {
         self.read_reg(0x03)
             .map(|val| CurrentRoute::from((val >> 3) & 0b111))
     }
 
     /// Read the raw ADC value
-    pub fn get_raw_adc(&mut self) -> Result<u32, Error<I2cError, EW, ER>> {
+    pub fn get_raw_adc(&mut self) -> Result<u32, Error<E>> {
         self.bus.read_data()
     }
 
@@ -334,12 +332,12 @@ impl<BUS, I2cError, EW, ER> ADS122x04<BUS>
     }
 
     /// Reset the device
-    pub fn reset(&mut self) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn reset(&mut self) -> Result<(), Error<E>> {
         self.bus.write_data(Commands::Reset as u8)
     }
 
     /// Start a measurement
-    pub fn start(&mut self) -> Result<(), Error<I2cError, EW, ER>> {
+    pub fn start(&mut self) -> Result<(), Error<E>> {
         self.bus.write_data(Commands::StartSync as u8)
     }
 }
