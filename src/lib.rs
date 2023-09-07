@@ -1,5 +1,3 @@
-use std::fmt::Debug;
-
 use embedded_hal::{
     blocking::i2c,
     blocking::serial,
