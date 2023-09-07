@@ -1,17 +1,24 @@
 //! ADS122x04 registers and commands
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
+/// Commands to send to the device
 pub enum Commands {
+    /// Reset the device
     Reset = 0b110,
+    /// Send START/SYNC command to start a measurement/series
     StartSync = 0b1000,
+    /// Put the device in PowerDown mode
     PowerDown = 0b10,
+    /// Request the data
     RData = 0b10000,
+    /// Command to read a register
     RReg = 0b0100000,
+    /// Command to write to a register
     WReg = 0b1000000,
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum Mux {
     Ain0Ain1 = 0b0000,
     Ain0Ain2 = 0b0001,
@@ -31,7 +38,7 @@ pub enum Mux {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum DataRate {
     Sps20Normal = 0b0000,
     Sps45Normal = 0b0010,
@@ -49,6 +56,7 @@ pub enum DataRate {
     Sps2000Turbo = 0b1101,
 }
 
+#[allow(dead_code, missing_docs)]
 impl DataRate {
     pub fn from(val: u8) -> Self {
         match val {
@@ -72,7 +80,7 @@ impl DataRate {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum CurrentSource {
     Off = 0b000,
     I10uA = 0b001,
@@ -84,6 +92,7 @@ pub enum CurrentSource {
     I1500uA = 0b111,
 }
 
+#[allow(dead_code, missing_docs)]
 impl CurrentSource {
     pub fn from(val: u8) -> Self {
         match val {
@@ -100,7 +109,7 @@ impl CurrentSource {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum CurrentRoute {
     Off = 0b000,
     Ain0 = 0b001,
@@ -111,6 +120,7 @@ pub enum CurrentRoute {
     RefN = 0b110,
 }
 
+#[allow(dead_code, missing_docs)]
 impl CurrentRoute {
     pub fn from(val: u8) -> Self {
         match val {
@@ -126,12 +136,13 @@ impl CurrentRoute {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum ConversionMode {
     SingleShot = 0,
     Continuous = 1,
 }
 
+#[allow(dead_code, missing_docs)]
 impl ConversionMode {
     pub fn from(val: u8) -> Self {
         match val {
@@ -142,13 +153,14 @@ impl ConversionMode {
 }
 
 #[derive(Debug, Copy, Clone)]
-#[allow(dead_code)]
+#[allow(dead_code, missing_docs)]
 pub enum Crc {
     Disabled = 0b00,
     Inverted = 0b01,
     Crc16 = 0b10,
 }
 
+#[allow(dead_code, missing_docs)]
 impl Crc {
     pub fn from(val: u8) -> Self {
         match val {
@@ -161,12 +173,17 @@ impl Crc {
 
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
+/// Voltage reference
 pub enum VRef {
+    /// use internal Vref of 2.048 volts
     Internal,
+    /// use external reference on RefP and RefN pins
     External(f32),
+    /// use AVDD-AVSS as a reference
     AnalogSupply(f32),
 }
 
+#[allow(dead_code, missing_docs)]
 impl VRef {
     pub fn to_val(&self) -> u8 {
         match self {

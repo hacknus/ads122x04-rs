@@ -24,3 +24,6 @@ use ads122x04::{interface::*, registers::*, ADS122x04, Error as ADS122x04Error};
 }
 
 ```
+
+TODO:
+- [ ] implement CRC

@@ -32,12 +32,16 @@ mod private {
 }
 
 #[derive(Debug)]
+/// Error enum for ADS122x04
 pub enum Error<E>
 {
+    /// An invalid value has been entered
     InvalidValue,
+    /// A communcation error has occured
     CommError(E),
 }
 
+/// Device handler for ADS122x04
 pub struct ADS122x04<BUS>
 {
     bus: BUS,
