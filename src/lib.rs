@@ -1,3 +1,9 @@
+#![no_std]
+
+use core::option::Option;
+use core::result::Result;
+use core::result::Result::Err;
+
 use embedded_hal::{
     blocking::i2c,
     blocking::serial,
