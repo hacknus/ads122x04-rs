@@ -1,4 +1,8 @@
+//! A platform agnostic rust driver for the ADS122U04 (UART) and ADS122C04 (I2C) ADC from Texas Instruments.
 #![no_std]
+#![allow(dead_code)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 use core::option::Option;
 use core::result::Result;

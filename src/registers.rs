@@ -1,3 +1,4 @@
+//! ADS122x04 registers and commands
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
 pub enum Commands {
