@@ -26,6 +26,7 @@ use ads122x04::{interface::*, registers::*, ADS122x04, Error as ADS122x04Error};
 ```
 
 TODO:
+- [ ] test UART
 - [ ] implement CRC
 
 ### Products That Use This Library
