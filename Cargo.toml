@@ -3,7 +3,13 @@ name = "ads122x04"
 authors = ["Linus Leo Stöckli"]
 version = "0.1.0"
 edition = "2021"
-description = "Driver for the ADS122C04 and ADS122U04 analog to digital converters."
+repository = "https://github.com/hacknus/ads122x04-rs"
+description = "Platform-agnostic driver for the ADS122C04 and ADS122U04 analog to digital converters."
+readme = "README.md"
+keywords = ["adc", "real-time", "driver", "embedded-hal-driver"]
+categories = ["embedded", "hardware-support", "no-std"]
+homepage = "https://github.com/hacknus/ads122x04-rs"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
