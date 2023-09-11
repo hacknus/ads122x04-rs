@@ -1,4 +1,4 @@
-# Rust ADS122x04 Driver
+# Texas Instruments ADS122x04 Rust Driver
 
 [![crates.io](https://img.shields.io/crates/v/ads122x04.svg)](https://crates.io/crates/ads122x04)
 [![Docs](https://docs.rs/ads122x04/badge.svg)](https://docs.rs/ads122x04)
