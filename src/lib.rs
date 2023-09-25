@@ -14,7 +14,6 @@ use embedded_hal::{
     blocking::serial,
     serial as serial_nb,
 };
-use embedded_hal::digital::v2::InputPin;
 
 use crate::{interface::{I2cInterface, ReadData, SerialInterface, WriteData}};
 use crate::registers::*;
@@ -44,10 +43,9 @@ pub enum Error<E>
 }
 
 /// Device handler for ADS122x04
-pub struct ADS122x04<BUS, PIN>
+pub struct ADS122x04<BUS>
 {
     bus: BUS,
-    data_ready: Option<PIN>,
     v_ref: VRef,
     gain: u8,
     mux: Mux,
@@ -64,7 +62,7 @@ pub struct ADS122x04<BUS, PIN>
     burn_out_current_sources: bool,
 }
 
-impl<I2C, E, PIN> ADS122x04<I2cInterface<I2C>, PIN>
+impl<I2C, E> ADS122x04<I2cInterface<I2C>>
     where
         I2C: i2c::Write<Error=E> + i2c::WriteRead<Error=E>,
 {
@@ -73,7 +71,6 @@ impl<I2C, E, PIN> ADS122x04<I2cInterface<I2C>, PIN>
     {
         ADS122x04 {
             bus: I2cInterface { i2c, address },
-            data_ready: None,
             v_ref: VRef::Internal,
             gain: 1,
             mux: Mux::Ain0Ain1,
@@ -92,7 +89,7 @@ impl<I2C, E, PIN> ADS122x04<I2cInterface<I2C>, PIN>
     }
 }
 
-impl<UART, E, PIN> ADS122x04<SerialInterface<UART>, PIN>
+impl<UART, E> ADS122x04<SerialInterface<UART>>
     where
         UART: serial::Write<u8, Error=E> + serial_nb::Read<u8, Error=E>,
 {
@@ -100,7 +97,6 @@ impl<UART, E, PIN> ADS122x04<SerialInterface<UART>, PIN>
     pub fn new_serial(serial: UART) -> Self {
         ADS122x04 {
             bus: SerialInterface { serial },
-            data_ready: None,
             v_ref: VRef::Internal,
             gain: 1,
             mux: Mux::Ain0Ain1,
@@ -119,10 +115,9 @@ impl<UART, E, PIN> ADS122x04<SerialInterface<UART>, PIN>
     }
 }
 
-impl<BUS, E, PIN> ADS122x04<BUS, PIN>
+impl<BUS, E> ADS122x04<BUS>
     where
         BUS: ReadData<Error=Error<E>> + WriteData<Error=Error<E>>,
-        PIN: InputPin
 {
     /// updates a specified config register
     fn update_reg(&mut self, reg: u8) -> Result<(), Error<E>> {
@@ -161,22 +156,6 @@ impl<BUS, E, PIN> ADS122x04<BUS, PIN>
             0x02 => self.bus.read_register(0x02),
             0x03 => self.bus.read_register(0x03),
             _ => Err(Error::InvalidValue),
-        }
-    }
-
-    /// Attach a DRDY (Data Ready) input pin
-    pub fn with_drdy(mut self, pin: PIN) -> Self {
-        self.data_ready = Some(pin);
-        self
-    }
-
-    /// Check if DRDY pin is set
-    pub fn is_data_ready(&self) -> bool {
-        match &self.data_ready {
-            None => { false }
-            Some(pin) => {
-                pin.is_high().unwrap_or(false)
-            }
         }
     }
 
