@@ -67,7 +67,6 @@ pub struct ADS122x04<BUS, PIN>
 impl<I2C, E, PIN> ADS122x04<I2cInterface<I2C>, PIN>
     where
         I2C: i2c::Write<Error=E> + i2c::WriteRead<Error=E>,
-        PIN: InputPin
 {
     /// Create a new ADS122C04 device by supplying an I2C address and I2C handler
     pub fn new_i2c(address: u8, i2c: I2C) -> Self
@@ -96,7 +95,6 @@ impl<I2C, E, PIN> ADS122x04<I2cInterface<I2C>, PIN>
 impl<UART, E, PIN> ADS122x04<SerialInterface<UART>, PIN>
     where
         UART: serial::Write<u8, Error=E> + serial_nb::Read<u8, Error=E>,
-        PIN: InputPin
 {
     /// Create a new ADS122C04 device by supplying a serial handler (UART)
     pub fn new_serial(serial: UART) -> Self {
