@@ -130,7 +130,8 @@ impl<BUS, E> ADS122x04<BUS>
                 let val = (self.temperature_sensor_mode as u8)
                     | (self.v_ref.to_val() << 1)
                     | ((self.conversion_mode as u8) << 3)
-                    | ((self.data_rate as u8) << 4);
+                    | ((self.turbo_mode as u8) << 4)
+                    | ((self.data_rate as u8) << 5);
                 self.bus.write_register(0x01, val)
             }
             0x02 => {
@@ -141,7 +142,7 @@ impl<BUS, E> ADS122x04<BUS>
                 self.bus.write_register(0x02, val)
             }
             0x03 => {
-                let val = ((self.current_route_2 as u8) << 3) | ((self.current_route_1 as u8) << 5);
+                let val = ((self.current_route_2 as u8) << 2) | ((self.current_route_1 as u8) << 5);
                 self.bus.write_register(0x03, val)
             }
             _ => Err(Error::InvalidValue),
