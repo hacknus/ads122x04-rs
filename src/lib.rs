@@ -47,7 +47,7 @@ pub struct ADS122x04<BUS>
 {
     bus: BUS,
     v_ref: VRef,
-    gain: u8,
+    gain: Gain,
     mux: Mux,
     current_source: CurrentSource,
     current_route_1: CurrentRoute,
@@ -72,7 +72,7 @@ impl<I2C, E> ADS122x04<I2cInterface<I2C>>
         ADS122x04 {
             bus: I2cInterface { i2c, address },
             v_ref: VRef::Internal,
-            gain: 1,
+            gain: Gain::Gain1,
             mux: Mux::Ain0Ain1,
             current_source: CurrentSource::Off,
             current_route_1: CurrentRoute::Off,
@@ -98,7 +98,7 @@ impl<UART, E> ADS122x04<SerialInterface<UART>>
         ADS122x04 {
             bus: SerialInterface { serial },
             v_ref: VRef::Internal,
-            gain: 1,
+            gain: Gain::Gain1,
             mux: Mux::Ain0Ain1,
             current_source: CurrentSource::Off,
             current_route_1: CurrentRoute::Off,
@@ -123,7 +123,7 @@ impl<BUS, E> ADS122x04<BUS>
     fn update_reg(&mut self, reg: u8) -> Result<(), Error<E>> {
         match reg {
             0x00 => {
-                let val = (self.pga_bypass as u8) | (self.gain << 1) | ((self.mux as u8) << 4);
+                let val = (self.pga_bypass as u8) | ((self.gain as u8) << 1) | ((self.mux as u8) << 4);
                 self.bus.write_register(0x00, val)
             }
             0x01 => {
@@ -172,19 +172,14 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// Set the gain as either 0, 1, 2, 4, 8, 16, 32, 64 or 128
-    pub fn set_gain(&mut self, gain: u8) -> Result<(), Error<E>> {
-        match gain {
-            0 | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => {
-                self.gain = gain;
-                self.update_reg(0x00)
-            }
-            _ => Err(Error::InvalidValue),
-        }
+    pub fn set_gain(&mut self, gain: Gain) -> Result<(), Error<E>> {
+        self.gain = gain;
+        self.update_reg(0x00)
     }
 
     /// Read the gain value
-    pub fn get_gain(&mut self) -> Result<u8, Error<E>> {
-        self.read_reg(0x00).map(|val| (val >> 1) & 0b111)
+    pub fn get_gain(&mut self) -> Result<Gain, Error<E>> {
+        self.read_reg(0x00).map(|val| Gain::from((val >> 1) & 0b111))
     }
 
     /// Set the input multiplexer (MUX)
