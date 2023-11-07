@@ -171,10 +171,10 @@ impl<BUS, E> ADS122x04<BUS>
         self.read_reg(0x00).map(|val| (val & 0b1) == 1)
     }
 
-    /// Set the gain as either 1, 2, 4, 8, 16, 32, 64 or 128
+    /// Set the gain as either 0, 1, 2, 4, 8, 16, 32, 64 or 128
     pub fn set_gain(&mut self, gain: u8) -> Result<(), Error<E>> {
         match gain {
-            1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => {
+            0 | 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => {
                 self.gain = gain;
                 self.update_reg(0x00)
             }
