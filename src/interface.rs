@@ -39,7 +39,7 @@ impl<I2C, E> WriteData for I2cInterface<I2C>
 {
     type Error = Error<E>;
     fn write_register(&mut self, register: u8, data: u8) -> Result<(), Self::Error> {
-        let register = Commands::WReg as u8 | (register << 1); // write command
+        let register = Commands::WReg as u8 | (register << 2); // write command
         self.i2c
             .write(self.address, &[register, data])
             .map_err(Error::CommError)
@@ -56,7 +56,7 @@ impl<UART, E> WriteData for SerialInterface<UART>
 {
     type Error = Error<E>;
     fn write_register(&mut self, register: u8, data: u8) -> Result<(), Self::Error> {
-        let register = Commands::WReg as u8 | (register << 1); // write command
+        let register = Commands::WReg as u8 | (register << 2); // write command
         self.serial.bwrite_all(&[0x55, register, data]).map_err(Error::CommError)?;
         self.serial.bflush().map_err(Error::CommError)
     }
@@ -83,7 +83,7 @@ impl<I2C, E> ReadData for I2cInterface<I2C>
 {
     type Error = Error<E>;
     fn read_register(&mut self, register: u8) -> Result<u8, Self::Error> {
-        let register = Commands::RReg as u8 | (register << 1); // read command
+        let register = Commands::RReg as u8 | (register << 2); // read command
         let mut buffer = [0];
         self.i2c
             .write_read(self.address, &[register], &mut buffer)
@@ -111,7 +111,7 @@ impl<UART, E> ReadData for SerialInterface<UART>
 {
     type Error = Error<E>;
     fn read_register(&mut self, register: u8) -> Result<u8, Self::Error> {
-        let register = Commands::RReg as u8 | (register << 1); // read command
+        let register = Commands::RReg as u8 | (register << 2); // read command
         self.serial.bwrite_all(&[0x55, register]).map_err(Error::CommError)?;
         self.serial.bflush().map_err(Error::CommError)?;
         block!(self.serial.read()).map_err(Error::CommError)
