@@ -323,7 +323,7 @@ impl<BUS, E> ADS122x04<BUS>
     /// transform the raw u32 value to signed i32 value according to datasheet
     fn raw_to_signed(&self, x: u32) -> i32 {
         if x >> 23 == 1 {
-            -((x & 2_u32.pow(23)) as i32)
+            -((x & 0b11111111111111111111111) as i32)
         } else {
             x as i32
         }
