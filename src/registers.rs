@@ -81,6 +81,36 @@ impl DataRate {
 
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code, missing_docs)]
+pub enum Gain {
+    Gain1 = 0b000,
+    Gain2 = 0b001,
+    Gain4 = 0b010,
+    Gain8 = 0b011,
+    Gain16 = 0b100,
+    Gain32 = 0b101,
+    Gain64 = 0b110,
+    Gain128 = 0b111,
+}
+
+#[allow(dead_code, missing_docs)]
+impl Gain {
+    pub fn from(val: u8) -> Self {
+        match val {
+            0b000 => Self::Gain1,
+            0b001 => Self::Gain2,
+            0b010 => Self::Gain4,
+            0b011 => Self::Gain8,
+            0b100 => Self::Gain16,
+            0b101 => Self::Gain32,
+            0b110 => Self::Gain64,
+            0b111 => Self::Gain128,
+            _ => Self::Gain1,
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+#[allow(dead_code, missing_docs)]
 pub enum CurrentSource {
     Off = 0b000,
     I10uA = 0b001,
