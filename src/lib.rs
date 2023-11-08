@@ -150,7 +150,7 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// reads a specified config register
-    fn read_reg(&mut self, reg: u8) -> Result<u8, Error<E>> {
+    pub fn read_reg(&mut self, reg: u8) -> Result<u8, Error<E>> {
         match reg {
             0x00 => self.bus.read_register(0x00),
             0x01 => self.bus.read_register(0x01),
