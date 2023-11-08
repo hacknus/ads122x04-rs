@@ -150,7 +150,7 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// reads a specified config register
-    pub fn read_reg(&mut self, reg: u8) -> Result<u8, Error<E>> {
+    fn read_reg(&mut self, reg: u8) -> Result<u8, Error<E>> {
         match reg {
             0x00 => self.bus.read_register(0x00),
             0x01 => self.bus.read_register(0x01),
@@ -321,9 +321,9 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// transform the raw u32 value to signed i32 value according to datasheet
-    fn raw_to_signed(&self, x: u32) -> i32 {
-        if x >> 23 == 1 {
-            -((x & 0b1111111111111111111111) as i32)
+    fn raw_to_signed(&self, x : u32) -> i32 {
+        if (x & 0x00800000) == 0x00800000 {
+            (x | 0xFF000000) as i32
         } else {
             x as i32
         }
