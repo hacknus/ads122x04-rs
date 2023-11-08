@@ -339,7 +339,7 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// Convert the raw ADC value to voltage
-    pub fn convert_raw_to_voltage(&mut self, raw: Option<u32>) -> Option<f32> {
+    pub fn convert_raw_to_voltage(&mut self, raw: Option<i32>) -> Option<f32> {
         // returns voltage in V
         let v_ref = self.v_ref.to_voltage();
         raw.map(|raw| (v_ref as f64 / ((1 << 23) as f64) * (raw as f64)) as f32)
