@@ -320,9 +320,18 @@ impl<BUS, E> ADS122x04<BUS>
             .map(|val| CurrentRoute::from((val >> 3) & 0b111))
     }
 
+    /// transform the raw u32 value to signed i32 value according to datasheet
+    fn raw_to_signed(&self, x: u32) -> i32 {
+        if x >> 23 == 1 {
+            -((x & 2_u32.pow(23)) as i32)
+        } else {
+            x as i32
+        }
+    }
+
     /// Read the raw ADC value
-    pub fn get_raw_adc(&mut self) -> Result<u32, Error<E>> {
-        self.bus.read_data()
+    pub fn get_raw_adc(&mut self) -> Result<i32, Error<E>> {
+        self.bus.read_data().map(|val| self.raw_to_signed(val))
     }
 
     /// Read the voltage of the ADC
