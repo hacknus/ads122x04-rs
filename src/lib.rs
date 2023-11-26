@@ -168,9 +168,10 @@ impl<BUS, E> ADS122x04<BUS>
     /// Calibrate the offset (according to 8.3.11 Offset Calibration in datasheet)
     /// This is recommended upon startup and after changing the gain.
     pub fn calibrate_offset(&mut self) -> Result<(), Error<E>> {
-        const NUM_AVG : usize = 10;
+        const NUM_AVG: usize = 10;
         let timeout = 100;
         // short the inputs to mid-supply (AVDD + AVSS) / 2
+        let previous_mux = self.mux;
         self.mux = Mux::Shorted;
         self.update_reg(0x00)?;
         // reset offset
@@ -183,13 +184,16 @@ impl<BUS, E> ADS122x04<BUS>
             while !self.get_data_ready()? {
                 timeout_counter += 1;
                 if timeout_counter > timeout {
-                    return Err(Error::Timeout)
+                    return Err(Error::Timeout);
                 }
             }
             offset += self.get_raw_adc()?;
         }
         // store offset
         self.offset = offset / (NUM_AVG as i32);
+        // return to previous mux
+        self.mux = previous_mux;
+        self.update_reg(0x00)?;
         Ok(())
     }
 
