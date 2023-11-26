@@ -166,6 +166,7 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// Calibrate the offset (according to 8.3.11 Offset Calibration in datasheet)
+    /// This is recommended upon startup and after changing the gain.
     pub fn calibrate_offset(&mut self) -> Result<(), Error<E>> {
         const NUM_AVG : usize = 10;
         let timeout = 100;

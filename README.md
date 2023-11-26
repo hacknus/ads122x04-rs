@@ -15,6 +15,7 @@ use ads122x04::{interface::*, registers::*, ADS122x04, Error as ADS122x04Error};
 {
     let mut adc = ADS122x04::new_i2c(address, i2c);
     adc.reset();
+    adc.calibrate_offset();
     adc.set_input_mux(Mux::Ain1Ain0);
     adc.set_conversion_mode(ConversionMode::Continuous);
     adc.set_current_level(CurrentSource::Off);
