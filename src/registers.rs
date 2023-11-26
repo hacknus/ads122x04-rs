@@ -136,6 +136,19 @@ impl CurrentSource {
             _ => Self::Off,
         }
     }
+
+    pub fn to_amps(&self) -> f32 {
+        match self {
+            CurrentSource::Off => { 0.0 }
+            CurrentSource::I10uA => { 0.00001 }
+            CurrentSource::I50uA => { 0.00005 }
+            CurrentSource::I100uA => { 0.0001 }
+            CurrentSource::I250uA => { 0.00025 }
+            CurrentSource::I500uA => { 0.0005 }
+            CurrentSource::I1000uA => { 0.001 }
+            CurrentSource::I1500uA => { 0.0015 }
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
