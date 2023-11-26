@@ -38,7 +38,9 @@ pub enum Error<E>
 {
     /// An invalid value has been entered
     InvalidValue,
-    /// A communcation error has occured
+    /// A timeout has occurred
+    Timeout,
+    /// A communication error has occured
     CommError(E),
 }
 
@@ -46,6 +48,7 @@ pub enum Error<E>
 pub struct ADS122x04<BUS>
 {
     bus: BUS,
+    offset: i32,
     v_ref: VRef,
     gain: Gain,
     mux: Mux,
@@ -71,6 +74,7 @@ impl<I2C, E> ADS122x04<I2cInterface<I2C>>
     {
         ADS122x04 {
             bus: I2cInterface { i2c, address },
+            offset: 0,
             v_ref: VRef::Internal,
             gain: Gain::Gain1,
             mux: Mux::Ain0Ain1,
@@ -97,6 +101,7 @@ impl<UART, E> ADS122x04<SerialInterface<UART>>
     pub fn new_serial(serial: UART) -> Self {
         ADS122x04 {
             bus: SerialInterface { serial },
+            offset: 0,
             v_ref: VRef::Internal,
             gain: Gain::Gain1,
             mux: Mux::Ain0Ain1,
@@ -158,6 +163,33 @@ impl<BUS, E> ADS122x04<BUS>
             0x03 => self.bus.read_register(0x03),
             _ => Err(Error::InvalidValue),
         }
+    }
+
+    /// Calibrate the offset (according to 8.3.11 Offset Calibration in datasheet)
+    pub fn calibrate_offset(&mut self) -> Result<(), Error<E>> {
+        const NUM_AVG : usize = 10;
+        let timeout = 100;
+        // short the inputs to mid-supply (AVDD + AVSS) / 2
+        self.mux = Mux::Shorted;
+        self.update_reg(0x00)?;
+        // reset offset
+        self.offset = 0;
+        // take multiple readings and average
+        let mut offset = 0;
+        let mut timeout_counter = 0;
+        for _ in 0..NUM_AVG {
+            self.start()?;
+            while !self.get_data_ready()? {
+                timeout_counter += 1;
+                if timeout_counter > timeout {
+                    return Err(Error::Timeout)
+                }
+            }
+            offset += self.get_raw_adc()?;
+        }
+        // store offset
+        self.offset = offset / (NUM_AVG as i32);
+        Ok(())
     }
 
     /// Enable or disable the programmable gain amplifier (PGA)
@@ -321,7 +353,7 @@ impl<BUS, E> ADS122x04<BUS>
     }
 
     /// transform the raw u32 value to signed i32 value according to datasheet
-    fn raw_to_signed(&self, x : u32) -> i32 {
+    fn raw_to_signed(&self, x: u32) -> i32 {
         if (x & 0x00800000) == 0x00800000 {
             (x | 0xFF000000) as i32
         } else {
@@ -329,9 +361,9 @@ impl<BUS, E> ADS122x04<BUS>
         }
     }
 
-    /// Read the raw ADC value
+    /// Read the raw ADC value and subtract the offset
     pub fn get_raw_adc(&mut self) -> Result<i32, Error<E>> {
-        self.bus.read_data().map(|val| self.raw_to_signed(val))
+        self.bus.read_data().map(|val| self.raw_to_signed(val) - self.offset)
     }
 
     /// Read the voltage of the ADC
