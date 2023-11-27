@@ -172,8 +172,8 @@ impl<BUS, E> ADS122x04<BUS>
         let timeout = 100;
         // short the inputs to mid-supply (AVDD + AVSS) / 2
         let previous_mux = self.mux;
-        self.mux = Mux::Shorted;
-        self.update_reg(0x00)?;
+        self.set_input_mux(Mux::Shorted)?;
+        self.set_conversion_mode(ConversionMode::SingleShot)?;
         // reset offset
         self.offset = 0;
         // take multiple readings and average
@@ -192,8 +192,7 @@ impl<BUS, E> ADS122x04<BUS>
         // store offset
         self.offset = offset / (NUM_AVG as i32);
         // return to previous mux
-        self.mux = previous_mux;
-        self.update_reg(0x00)?;
+        self.set_input_mux(previous_mux)?;
         Ok(())
     }
 
