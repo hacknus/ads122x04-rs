@@ -169,10 +169,11 @@ impl<BUS, E> ADS122x04<BUS>
     /// This is recommended upon startup and after changing the gain.
     pub fn calibrate_offset(&mut self) -> Result<(), Error<E>> {
         const NUM_AVG: usize = 10;
-        let timeout = 100;
+        let timeout = 1000;
         // short the inputs to mid-supply (AVDD + AVSS) / 2
         let previous_mux = self.mux;
         self.set_input_mux(Mux::Shorted)?;
+        self.set_data_rate(DataRate::Sps40Turbo)?;
         self.set_conversion_mode(ConversionMode::SingleShot)?;
         // reset offset
         self.offset = 0;
