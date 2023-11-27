@@ -48,7 +48,7 @@ pub enum Error<E>
 pub struct ADS122x04<BUS>
 {
     bus: BUS,
-    offset: i32,
+    pub offset: i32,
     v_ref: VRef,
     gain: Gain,
     mux: Mux,
