@@ -35,6 +35,10 @@ mod private {
 /// Error enum for ADS122x04
 pub enum Error<E>
 {
+    /// The input is shorted
+    ShortedInput,
+    /// Inputs is open
+    OpenInput,
     /// An invalid value has been entered
     InvalidValue,
     /// A timeout has occurred
