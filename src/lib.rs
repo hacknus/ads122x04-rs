@@ -31,7 +31,7 @@ mod private {
     impl<I2C, > Sealed for interface::I2cInterface<I2C> {}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 /// Error enum for ADS122x04
 pub enum Error<E>
 {
