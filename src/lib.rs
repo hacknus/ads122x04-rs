@@ -36,15 +36,15 @@ mod private {
 pub enum Error<E>
 {
     /// The input is shorted
-    ShortedInput,
+    SI,
     /// Inputs is open
-    OpenInput,
+    OI,
     /// An invalid value has been entered
-    InvalidValue,
+    IV,
     /// A timeout has occurred
-    Timeout,
+    TO,
     /// A communication error has occured
-    CommError(E),
+    CE(E),
 }
 
 /// Device handler for ADS122x04
