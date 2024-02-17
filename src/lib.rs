@@ -154,7 +154,7 @@ impl<BUS, E> ADS122x04<BUS>
                 let val = ((self.current_route_2 as u8) << 2) | ((self.current_route_1 as u8) << 5);
                 self.bus.write_register(0x03, val)
             }
-            _ => Err(Error::InvalidValue),
+            _ => Err(Error::IV),
         }
     }
 
@@ -165,7 +165,7 @@ impl<BUS, E> ADS122x04<BUS>
             0x01 => self.bus.read_register(0x01),
             0x02 => self.bus.read_register(0x02),
             0x03 => self.bus.read_register(0x03),
-            _ => Err(Error::InvalidValue),
+            _ => Err(Error::IV),
         }
     }
 
@@ -189,7 +189,7 @@ impl<BUS, E> ADS122x04<BUS>
             while !self.get_data_ready()? {
                 timeout_counter += 1;
                 if timeout_counter > timeout {
-                    return Err(Error::Timeout);
+                    return Err(Error::TO);
                 }
             }
             offset += self.get_raw_adc()?;
