@@ -8,11 +8,8 @@ use core::fmt::Debug;
 use core::result::Result;
 use core::result::Result::Err;
 
-use embedded_hal::{
-    blocking::i2c,
-    blocking::serial,
-    serial as serial_nb,
-};
+use embedded_hal::i2c::{I2c};
+use embedded_io::{Read, Write};
 
 use crate::{interface::{I2cInterface, ReadData, SerialInterface, WriteData}};
 use crate::registers::*;
@@ -69,9 +66,9 @@ pub struct ADS122x04<BUS>
     burn_out_current_sources: bool,
 }
 
-impl<I2C, E> ADS122x04<I2cInterface<I2C>>
-    where
-        I2C: i2c::Write<Error=E> + i2c::WriteRead<Error=E>,
+impl<I2C> ADS122x04<I2cInterface<I2C>>
+where
+    I2C: I2c,
 {
     /// Create a new ADS122C04 device by supplying an I2C address and I2C handler
     pub fn new_i2c(address: u8, i2c: I2C) -> Self
@@ -97,9 +94,9 @@ impl<I2C, E> ADS122x04<I2cInterface<I2C>>
     }
 }
 
-impl<UART, E> ADS122x04<SerialInterface<UART>>
-    where
-        UART: serial::Write<u8, Error=E> + serial_nb::Read<u8, Error=E>,
+impl<UART> ADS122x04<SerialInterface<UART>>
+where
+    UART: Write + Read,
 {
     /// Create a new ADS122C04 device by supplying a serial handler (UART)
     pub fn new_serial(serial: UART) -> Self {
@@ -125,8 +122,8 @@ impl<UART, E> ADS122x04<SerialInterface<UART>>
 }
 
 impl<BUS, E> ADS122x04<BUS>
-    where
-        BUS: ReadData<Error=Error<E>> + WriteData<Error=Error<E>>,
+where
+    BUS: ReadData<Error=Error<E>> + WriteData<Error=Error<E>>,
 {
     /// updates a specified config register
     fn update_reg(&mut self, reg: u8) -> Result<(), Error<E>> {
